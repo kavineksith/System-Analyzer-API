@@ -7,7 +7,7 @@ from flask_cors import CORS
 import time
 import sqlite3
 from sys_analyze_api import systemAnalyzer
-
+import logging
 
 class Database:
     """Class responsible for interacting with the SQLite database for request limits."""
@@ -141,8 +141,9 @@ class App:
             return jsonify(statistics), 200
 
         except Exception as e:
-            # Log the error (not shown here, but would be logged in a real application)
-            return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+            # Log the error
+            logging.error(f"Internal server error: {str(e)}")
+            return jsonify({'error': 'An internal error has occurred. Please try again later.'}), 500
 
     def run(self):
         """Run the Flask app."""
