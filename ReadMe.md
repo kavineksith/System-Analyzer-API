@@ -34,22 +34,22 @@ This Python script provides comprehensive system monitoring capabilities, offeri
 
 ## Dependencies
 - Python 3.x
-- `psutil` library for accessing system-related information
-- `os` library for system-specific functions
-- `platform` library for accessing system platform information
-- `datetime` library for date-time operations
-- `socket` library for network-related operations
-- `netifaces` library for network interface information and IP address retrieval
-- `report_signatures` module for generating reports with date-time stamps
-
-- `Flask`: A lightweight Python web framework to build web applications.
-- `jsonify`: A Flask helper function to convert Python data structures (like dictionaries) into JSON format, which is typically used in REST APIs.
-- `request`: Used to access incoming HTTP requests, including data from headers, query parameters, or JSON body.
-- `Limiter`: A Flask extension for rate limiting, helpful to prevent abuse of the API by limiting the number of requests a user can make in a given period.
-- `get_remote_address`: A utility function from `flask_limiter.util` to fetch the IP address of the client making the request.
-- `CORS`: Enables Cross-Origin Resource Sharing (CORS) in the Flask app, useful when your frontend is served from a different domain than your API.
-- `time`: The built-in Python library for time-related operations.
-- `sqlite3`: A built-in Python library for interacting with SQLite databases, helpful for storing and querying data in a lightweight database.
+  - `psutil` library for accessing system-related information
+  - `os` library for system-specific functions
+  - `platform` library for accessing system platform information
+  - `datetime` library for date-time operations
+  - `socket` library for network-related operations
+  - `netifaces` library for network interface information and IP address retrieval
+  - `report_signatures` module for generating reports with date-time stamps
+  
+  - `Flask`: A lightweight Python web framework to build web applications.
+  - `jsonify`: A Flask helper function to convert Python data structures (like dictionaries) into JSON format, which is typically used in REST APIs.
+  - `request`: Used to access incoming HTTP requests, including data from headers, query parameters, or JSON body.
+  - `Limiter`: A Flask extension for rate limiting, helpful to prevent abuse of the API by limiting the number of requests a user can make in a given period.
+  - `get_remote_address`: A utility function from `flask_limiter.util` to fetch the IP address of the client making the request.
+  - `CORS`: Enables Cross-Origin Resource Sharing (CORS) in the Flask app, useful when your frontend is served from a different domain than your API.
+  - `time`: The built-in Python library for time-related operations.
+  - `sqlite3`: A built-in Python library for interacting with SQLite databases, helpful for storing and querying data in a lightweight database.
 
 ## Usage
 1. **Execution**: Run the script using Python 3.x.
