@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import jsonify
+from flask import jsonify, current_app as app
 from battery_management import BatteryManager
 from cpu_management import CPUManager
 from disk_management import DiskManager
@@ -28,7 +28,8 @@ class systemAnalyzer:
             return status_list
 
         except Exception as e:
-            return jsonify({'error': f'Error in generating all-in-one report: {e}'}), 500
+            app.logger.error(f'Error in generating all-in-one report: {e}')
+            return jsonify({'error': 'An internal error has occurred while generating the report.'}), 500
 
     @staticmethod
     def once_status_one_report(token):
@@ -51,4 +52,5 @@ class systemAnalyzer:
                 case _:
                     raise ValueError('Invalid selection. Please enter a number between 1 and 7.')
         except ValueError and Exception as e:
-            return jsonify({'error':f'Error executing report: {e}'}), 400
+            app.logger.error(f'Error executing report: {e}')
+            return jsonify({'error': 'An internal error has occurred while executing the report.'}), 400
