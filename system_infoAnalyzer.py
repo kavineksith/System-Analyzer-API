@@ -6,44 +6,65 @@ import json
 import platform
 import sys
 import psutil
+import logging
 from report_signatures import TimeStampGenerator  # importing date-time stamp generator library
 
+# Configure the logger
+logging.basicConfig(level=logging.DEBUG,  # Log all levels (DEBUG and above)
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
+
+# Create a logger
+logger = logging.getLogger(__name__)
 
 class SystemInformation:
     @staticmethod
     def check_reboot():
         try:
+            logger.info("Checking for pending reboot.")
             location = os.path.exists('run/reboot-required')
-            return "Pending Reboot." if location else "No pending Reboot."
+            reboot_status = "Pending Reboot." if location else "No pending Reboot."
+            logger.info(f"Reboot status: {reboot_status}")
+            return reboot_status
         except Exception as e:
+            logger.error(f"Error checking reboot status: {e}")
             raise RuntimeError("Error checking reboot status:", e)
 
     @staticmethod
     def get_boot_time():
         try:
+            logger.info("Fetching system boot time.")
             boot_time = psutil.boot_time()
+            logger.info(f"System boot time fetched: {boot_time}")
             return boot_time
         except Exception as e:
+            logger.error(f"Error fetching boot time: {e}")
             raise RuntimeError("Error fetching boot time:", e)
 
     @staticmethod
     def get_users():
         try:
+            logger.info("Fetching system users.")
             users = psutil.users()
-            return [value[0] for value in users]
+            user_list = [value[0] for value in users]
+            logger.info(f"Users fetched: {user_list}")
+            return user_list
         except Exception as e:
+            logger.error(f"Error fetching user profiles: {e}")
             raise RuntimeError("Error fetching user profiles:", e)
 
     @staticmethod
     def system_info():
         try:
+            logger.info("Retrieving system information.")
+            
             # Retrieving basic system information using platform and os modules
             os_name = os.name.upper()
             system_architecture = sys.platform
             os_platform = platform.system()
             os_architecture = platform.architecture()[0]
             os_release = platform.release()
-            # os_version = platform.version()
+            os_version = platform.version()
             device_processor = platform.processor()
             machine_type = platform.machine()
             sys_platform = platform.platform()
@@ -53,13 +74,13 @@ class SystemInformation:
             system_users = SystemInformation().get_users()
 
             # System Info Statistics
-
             statistics = {
                 'System Info Statistics': {
                     'System Information': {
                         'Device Name': f'{device_name}',
                         'Operating System': f'{os_platform} {os_name} {os_release} {os_architecture} {os_edition}',
                         'OS Release and Service Pack Version': f'{sys_platform}',
+                        'Operating System Version': f'{os_version}',
                         'Processor Identity': f'{device_processor}',
                         'Machine Type': f'{machine_type}',
                         'System Platform': f'{system_architecture}',
@@ -75,10 +96,13 @@ class SystemInformation:
                 }
             }
 
+            logger.info("System information retrieved successfully.")
             result = json.dumps(statistics, indent=4)
             json_output = json.loads(result)
             return json_output  # Return the JSON output as a string
+        
         except RuntimeError as re:
-            print("Error fetching system information: ", re)
+            logger.error(f"Error fetching system information: {re}")
         except Exception as e:
-            raise RuntimeError("An error occurred: ", e)
+            logger.error(f"An error occurred: {e}")
+            raise RuntimeError("An error occurred:", e)

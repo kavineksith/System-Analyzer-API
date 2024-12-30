@@ -4,18 +4,31 @@ import json
 import psutil
 import sys
 from report_signatures import TimeStampGenerator
+import logging  # Import logging module
 
+# Configure the logger
+logging.basicConfig(level=logging.DEBUG,  # Log all levels (DEBUG and above)
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
+
+# Create a logger
+logger = logging.getLogger(__name__)
 
 class MemoryManager:
     @staticmethod
     # Function to retrieve and print memory statistics
     def memory_statistics():
         try:
+            logger.info("Started retrieving memory statistics.")
+            
             # System memory usage statistics
             v_memory = psutil.virtual_memory()
+            logger.debug(f"Virtual memory: {v_memory}")
+            
             # System swap memory statistics
             s_memory = psutil.swap_memory()
-
+            logger.debug(f"Swap memory: {s_memory}")
+            
             statistics = {
                 'Memory Usage Statistics': {
                     'System Memory': {
@@ -40,7 +53,9 @@ class MemoryManager:
 
             result = json.dumps(statistics, indent=4)
             json_output = json.loads(result)
+            
+            logger.info("Memory statistics retrieved and converted to JSON successfully.")
             return json_output  # Return the JSON output as a string
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"Error retrieving memory statistics: {e}")
             sys.exit(1)
