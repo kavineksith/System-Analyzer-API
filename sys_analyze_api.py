@@ -37,7 +37,7 @@ class SystemAnalyzer:
 
         except Exception as e:
             logger.error(f"Error generating all-in-one report: {e}")
-            return jsonify({'error': f'Error in generating all-in-one report: {e}'}), 500
+            return jsonify({'error': 'An internal error has occurred while generating the report.'}), 500
 
     @staticmethod
     def once_status_one_report(token):
@@ -65,4 +65,4 @@ class SystemAnalyzer:
             return jsonify({'error': f'Value error: {ve}'}), 400
         except Exception as e:
             logger.error(f"Error executing report for token {token}: {e}")
-            return jsonify({'error': f'Error executing report: {e}'}), 500
+            return jsonify({'error': 'An internal error has occurred while executing the report.'}), 500
