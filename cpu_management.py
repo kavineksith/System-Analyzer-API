@@ -4,7 +4,15 @@ import json
 import psutil
 import sys
 from report_signatures import TimeStampGenerator
+import logging  # Import the logging module
 
+# Configure the logger
+logging.basicConfig(level=logging.DEBUG,  # Log all levels (DEBUG and above)
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
+
+# Create a logger
+logger = logging.getLogger(__name__)
 
 class CPUManager:
     def __init__(self):
@@ -18,24 +26,40 @@ class CPUManager:
     # Function to monitor CPU usage and related statistics
     def monitor_cpu(self):
         try:
+            logger.info("Started CPU monitoring process.")
+            
             # Retrieve total CPU usage
             self.cpu_usage = psutil.cpu_percent(interval=1, percpu=False)
-            # Retrieve total processor cores count
-            self.cpu_count = psutil.cpu_count(logical=True)
+            logger.debug(f"Total CPU Usage: {self.cpu_usage}%")
+            
+            # Retrieve total processor cores count (Logical)
+            self.logical_cpu_count = psutil.cpu_count(logical=True)
+            # Retrieve total processor cores count (Physical)
+            self.physical_cpu_count = psutil.cpu_count(logical=False)
+            logger.debug(f"Logical CPU cores: {self.logical_cpu_count}, Physical CPU cores: {self.physical_cpu_count}")
+
             # Retrieve system CPU times statistics as time durations
             self.cpu_time = psutil.cpu_times(percpu=False)
+            logger.debug(f"CPU Times: {self.cpu_time}")
+
             # Retrieve system CPU times statistics as percentages
             self.cpu_time_percentages = psutil.cpu_times_percent(interval=1, percpu=False)
+            logger.debug(f"CPU Times Percentages: {self.cpu_time_percentages}")
+
             # Retrieve current, min, and max CPU frequencies
             self.cpu_frequents = psutil.cpu_freq(percpu=False)
+            logger.debug(f"CPU Frequencies: Current = {self.cpu_frequents.current} MHz, Min = {self.cpu_frequents.min} MHz, Max = {self.cpu_frequents.max} MHz")
+
             # Retrieve CPU stats
             self.cpu_stats = psutil.cpu_stats()
+            logger.debug(f"CPU Stats: {self.cpu_stats}")
 
             statistics = {
                 'CPU Usage Statistics': {
                     'Total CPU Usage': f'{self.cpu_usage} %',
-                    'Total Processor Cores Count': f'{self.cpu_count}',
-                    'CPU Load Status': f'{"CPU load is normal." if psutil.cpu_percent(1) < 75 else "CPU load is too high."}',
+                    'Total Processor Cores Count (Logical)': f'{self.logical_cpu_count}',
+                    'Total Processor Cores Count (Physical)': f'{self.physical_cpu_count}',
+                    'CPU Load Status': f'{"CPU load is normal." if self.cpu_usage < 75 else "CPU load is too high."}',
                     'System CPU Time Statistics (Time)': {
                         'User': f'{TimeStampGenerator().convertTime(self.cpu_time[0])}',
                         'System': f'{TimeStampGenerator().convertTime(self.cpu_time[1])}',
@@ -67,7 +91,10 @@ class CPUManager:
 
             result = json.dumps(statistics, indent=4)
             json_output = json.loads(result)
+            logger.info("CPU statistics successfully converted to JSON format.")
+            
             return json_output  # Return the JSON output as a string
+
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"Error during CPU monitoring: {e}")
             sys.exit(1)

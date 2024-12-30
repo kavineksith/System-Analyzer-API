@@ -4,7 +4,15 @@ import json
 import psutil
 import sys
 from report_signatures import TimeStampGenerator
+import logging  # Import logging module
 
+# Configure the logger
+logging.basicConfig(level=logging.DEBUG,  # Log all levels (DEBUG and above)
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
+
+# Create a logger
+logger = logging.getLogger(__name__)
 
 class ProcessManager:
     def __init__(self):
@@ -12,32 +20,36 @@ class ProcessManager:
 
     def get_process_list(self):
         try:
+            logger.info("Retrieving process list.")
             self.process_list = [{'pid': pid} for pid in psutil.pids()]
+            logger.info(f"Retrieved process list: {self.process_list}")
             return self.process_list
         except Exception as e:
-            print(f"Error retrieving process list: {e}")
+            logger.error(f"Error retrieving process list: {e}")
             sys.exit(1)
 
     def get_process_info(self):
         process_info_list = []
         try:
+            logger.info("Gathering process information.")
             for process in self.process_list:
                 process_id = process['pid']
-                process = psutil.Process(process_id)
-                process_info = process.as_dict(attrs=['pid', 'name'])
+                proc = psutil.Process(process_id)
+                process_info = proc.as_dict(attrs=['pid', 'name'])
                 process_info_list.append(process_info)
 
+            logger.info(f"Retrieved process information: {process_info_list}")
             return process_info_list
         except psutil.NoSuchProcess as e:
-            print(f"Error retrieving process info: {e}")
+            logger.error(f"Error retrieving process info: {e}")
             sys.exit(1)
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"Error: {e}")
             sys.exit(1)
 
     def manage_processes(self):
         try:
-            # System Processes Statistics
+            logger.info("Managing system processes.")
             process_list = self.get_process_list()
             process_info = self.get_process_info()
 
@@ -55,7 +67,9 @@ class ProcessManager:
 
             result = json.dumps(statistics, indent=4)
             json_output = json.loads(result)
+
+            logger.info("System processes managed successfully.")
             return json_output  # Return the JSON output as a string
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"Error managing processes: {e}")
             sys.exit(1)

@@ -6,8 +6,16 @@ from flask_limiter.util import get_remote_address
 from flask_cors import CORS
 import time
 import sqlite3
-from sys_analyze_api import systemAnalyzer
+from sys_analyze_api import SystemAnalyzer
 import logging
+
+# Configure the logger
+logging.basicConfig(level=logging.DEBUG,  # Log all levels (DEBUG and above)
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
+
+# Create a logger
+logger = logging.getLogger(__name__)
 
 class Database:
     """Class responsible for interacting with the SQLite database for request limits."""
@@ -56,8 +64,10 @@ class Database:
             return True
 
         except sqlite3.DatabaseError as e:
+            logger.error(f"Database error during request limit check: {e}")
             raise Exception(f"Database error during request limit check: {e}")
         except Exception as e:
+            logger.error(f"Unexpected error: {e}")
             raise Exception(f"Unexpected error: {e}")
 
 
@@ -74,6 +84,7 @@ class RateLimiter:
         try:
             return self.database.check_request_limit(ip, self.limit, self.window)
         except Exception as e:
+            logger.error(f"Error checking or updating rate limit for IP {ip}: {e}")
             raise Exception(f"Error checking or updating rate limit: {e}")
 
 
@@ -86,22 +97,27 @@ class ReportGenerator:
         try:
             if report_type == 'single_report':
                 if report_id < 0 or report_id > 7:
+                    logger.warning(f"Invalid report ID: {report_id}. Must be between 0 and 7.")
                     return None, 'Invalid report ID. Please enter a number between 0 and 7.'
-                statistics = systemAnalyzer.once_status_one_report(report_id)
+                statistics = SystemAnalyzer.once_status_one_report(report_id)
                 if statistics is None:
+                    logger.error(f"Failed to generate report with Report ID {report_id}.")
                     return None, f'Failed to generate report with Report ID {report_id}.'
                 return statistics, None
 
             elif report_type == 'all_in_one':
-                statistics = systemAnalyzer.all_in_one()
+                statistics = SystemAnalyzer.all_in_one()
                 if statistics is None:
+                    logger.error('Failed to generate all-in-one report.')
                     return None, 'Failed to generate all-in-one report.'
                 return statistics, None
 
             else:
+                logger.warning(f"Invalid report type: {report_type}. Must be 'single_report' or 'all_in_one'.")
                 return None, 'Invalid report type. Please choose "single_report" or "all_in_one".'
 
         except Exception as e:
+            logger.error(f"Error generating report: {e}")
             raise Exception(f"Error generating report: {e}")
 
 
@@ -117,7 +133,7 @@ class App:
 
     def configure_app(self):
         """Configure the Flask app, set up CORS and routes."""
-        CORS(self.app, resources={r"/api/*": {"origins": ["http://127.0.0.1"]}}) # Please add the appropriate origin
+        CORS(self.app, resources={r"/api/*": {"origins": ["http://127.0.0.1"]}})  # Please add the appropriate origin
         self.app.add_url_rule('/report', view_func=self.get_report, methods=['GET'])
         limiter = Limiter(get_remote_address, app=self.app)
         limiter.init_app(self.app)
@@ -129,28 +145,31 @@ class App:
         # Check if the IP has exceeded the rate limit
         try:
             if not self.rate_limiter.check_and_update(ip):
+                logger.warning(f"Rate limit exceeded for IP {ip}.")
                 return jsonify({'error': 'Request limit exceeded. Please try again later.'}), 429
 
             report_type = request.args.get('type', default='single_report', type=str)
             report_id = request.args.get('id', default=0, type=int)
 
+            logger.info(f"Received request for report type: {report_type}, report ID: {report_id}")
             statistics, error = self.report_generator.get_report(report_type, report_id)
             if error:
+                logger.error(f"Error generating report: {error}")
                 return jsonify({'error': error}), 400
 
+            logger.info(f"Successfully generated report for {report_type} with ID {report_id}")
             return jsonify(statistics), 200
 
         except Exception as e:
-            # Log the error
-            logging.error(f"Internal server error: {str(e)}")
-            return jsonify({'error': 'An internal error has occurred. Please try again later.'}), 500
+            logger.error(f"Internal server error: {e}")
+            return jsonify({'error': f'Internal server error: {str(e)}'}), 500
 
     def run(self):
         """Run the Flask app."""
         try:
             self.app.run(host='0.0.0.0', port=5000, debug=True)
         except Exception as e:
-            # Log the error (not shown here, but would be logged in a real application)
+            logger.error(f"Error running the app: {e}")
             print(f"Error running the app: {e}")
 
 
