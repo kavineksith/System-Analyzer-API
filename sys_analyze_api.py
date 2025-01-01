@@ -71,7 +71,7 @@ class SystemAnalyzer:
                     raise ValueError('Invalid selection. Please enter a number between 1 and 7.')
         except ValueError as ve:
             logger.warning(f"Value error: {ve}")
-            return jsonify({'error': f'Value error: {ve}'}), 400
+            return jsonify({'error': 'Invalid input. Please enter a valid number between 1 and 7.'}), 400
         except Exception as e:
             logger.error(f"Error executing report for token {token}: {e}")
             return jsonify({'error': 'An internal error has occurred while executing the report.'}), 500
