@@ -170,8 +170,8 @@ class App:
             return jsonify(statistics), 200
 
         except Exception as e:
-            logger.error(f"Internal server error: {e}")
-            return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+            logger.error(f"Internal server error: {e}", exc_info=True)
+            return jsonify({'error': 'An internal error has occurred. Please try again later.'}), 500
 
     def run(self):
         """Run the Flask app."""
