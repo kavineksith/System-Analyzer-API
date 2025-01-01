@@ -9,13 +9,22 @@ import sqlite3
 from sys_analyze_api import SystemAnalyzer
 import logging
 
-# Configure the logger
-logging.basicConfig(level=logging.DEBUG,  # Log all levels (DEBUG and above)
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    handlers=[logging.StreamHandler()])
-
-# Create a logger
+# Configure logging
 logger = logging.getLogger(__name__)
+
+# Create file handler for logging to a file
+file_handler = logging.FileHandler('system_analysis.log')
+file_handler.setLevel(logging.DEBUG)  # Write all logs (DEBUG and higher) to the file
+
+# Create a formatter and attach it to the file handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+
+# Add the file handler to the logger
+logger.addHandler(file_handler)
+
+# Set the logger's level to DEBUG to capture all log levels
+logger.setLevel(logging.DEBUG)
 
 class Database:
     """Class responsible for interacting with the SQLite database for request limits."""
@@ -161,8 +170,8 @@ class App:
             return jsonify(statistics), 200
 
         except Exception as e:
-            logger.error(f"Internal server error: {e}", exc_info=True)
-            return jsonify({'error': 'An internal error has occurred. Please try again later.'}), 500
+            logger.error(f"Internal server error: {e}")
+            return jsonify({'error': f'Internal server error: {str(e)}'}), 500
 
     def run(self):
         """Run the Flask app."""
