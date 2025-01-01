@@ -10,13 +10,22 @@ from network_management import NetworkManager
 from process_management import ProcessManager
 from system_infoAnalyzer import SystemInformation
 
-# Configure the logger
-logging.basicConfig(level=logging.DEBUG,  # Log all levels (DEBUG and above)
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    handlers=[logging.StreamHandler()])
-
-# Create a logger
+# Configure logging
 logger = logging.getLogger(__name__)
+
+# Create file handler for logging to a file
+file_handler = logging.FileHandler('system_analysis.log')
+file_handler.setLevel(logging.DEBUG)  # Write all logs (DEBUG and higher) to the file
+
+# Create a formatter and attach it to the file handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+
+# Add the file handler to the logger
+logger.addHandler(file_handler)
+
+# Set the logger's level to DEBUG to capture all log levels
+logger.setLevel(logging.DEBUG)
 
 class SystemAnalyzer:
     @staticmethod
@@ -37,7 +46,7 @@ class SystemAnalyzer:
 
         except Exception as e:
             logger.error(f"Error generating all-in-one report: {e}")
-            return jsonify({'error': 'An internal error has occurred while generating the report.'}), 500
+            return jsonify({'error': f'Error in generating all-in-one report: {e}'}), 500
 
     @staticmethod
     def once_status_one_report(token):
@@ -62,7 +71,7 @@ class SystemAnalyzer:
                     raise ValueError('Invalid selection. Please enter a number between 1 and 7.')
         except ValueError as ve:
             logger.warning(f"Value error: {ve}")
-            return jsonify({'error': 'Invalid input value. Please check your request and try again.'}), 400
+            return jsonify({'error': f'Value error: {ve}'}), 400
         except Exception as e:
             logger.error(f"Error executing report for token {token}: {e}")
-            return jsonify({'error': 'An internal error has occurred while executing the report.'}), 500
+            return jsonify({'error': f'Error executing report: {e}'}), 500

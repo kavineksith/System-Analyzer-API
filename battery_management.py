@@ -6,13 +6,22 @@ from report_signatures import TimeStampGenerator  # importing generate_report an
 import sys  # importing sys library
 import logging  # Import logging module
 
-# Configure the logger
-logging.basicConfig(level=logging.DEBUG,  # Log all levels (DEBUG and above)
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    handlers=[logging.StreamHandler()])
-
-# Create a logger
+# Configure logging
 logger = logging.getLogger(__name__)
+
+# Create file handler for logging to a file
+file_handler = logging.FileHandler('system_analysis.log')
+file_handler.setLevel(logging.DEBUG)  # Write all logs (DEBUG and higher) to the file
+
+# Create a formatter and attach it to the file handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+
+# Add the file handler to the logger
+logger.addHandler(file_handler)
+
+# Set the logger's level to DEBUG to capture all log levels
+logger.setLevel(logging.DEBUG)
 
 class BatteryManager:
     @staticmethod
@@ -50,3 +59,4 @@ class BatteryManager:
             logger.error(f"Error during battery management: {e}")
             sys.exit(1)
 
+print(BatteryManager().batteryManagement())
